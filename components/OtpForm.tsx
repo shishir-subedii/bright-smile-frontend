@@ -2,25 +2,43 @@
 
 import { useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ShieldCheck, RotateCcw } from "lucide-react";
 import { verifyOtpAction } from "@/lib/actions/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+interface FormState {
+    success: boolean;
+    message?: string;
+}
 
 export default function OtpForm() {
+    const [state, formAction] = useActionState<FormState, FormData>(verifyOtpAction, { success: true, message: "" });
     const { pending } = useFormStatus();
     const inputRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
 
     useEffect(() => {
         if (inputRef.current) {
             inputRef.current.focus();
         }
-    }, []);
+        if (state.message) {
+            if (state.success) {
+                toast.success(state.message);
+                router.push("/login");
+            } else {
+                toast.error(state.message);
+            }
+        }
+    }, [state, router]);
 
     return (
-        <form action={verifyOtpAction} className="space-y-6">
+        <form action={formAction} className="space-y-6">
             <div className="flex justify-center">
                 <ShieldCheck className="w-12 h-12 text-cyan-500 mb-4" />
             </div>

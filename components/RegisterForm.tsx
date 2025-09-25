@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,14 +12,29 @@ import { Eye, EyeOff } from "lucide-react";
 import { registerAction } from "@/lib/actions/auth";
 import Link from "next/link";
 import GoogleAuthButton from "@/components/common/GoogleAuthButton";
+import { toast } from "sonner";
+
+interface FormState {
+    success: boolean;
+    message?: string;
+}
 
 export default function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [state, formAction] = useActionState<FormState, FormData>(registerAction, { success: true, message: "" });
     const { pending } = useFormStatus();
 
+    useEffect(() => {
+        if (state.message && !state.success) {
+            toast.error(state.message);
+        } else if (state.success && state.message) {
+            toast.success(state.message);
+        }
+    }, [state]);
+
     return (
-        <form action={registerAction} className="space-y-6">
+        <form action={formAction} className="space-y-6">
             <div>
                 <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                     Full Name
@@ -119,7 +135,7 @@ export default function RegisterForm() {
 
             <div className="flex items-center">
                 <Separator className="flex-grow" />
-                <span className="flex-shrink mx-4 text-gray-500">OR</span>
+                <span className="flex-shrink mx-4 text-gray-500"></span>
                 <Separator className="flex-grow" />
             </div>
 
@@ -127,7 +143,7 @@ export default function RegisterForm() {
 
             <div className="text-center text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link href="#" className="text-cyan-600 hover:underline font-medium">
+                <Link href="/login" className="text-cyan-600 hover:underline font-medium">
                     Login
                 </Link>
             </div>

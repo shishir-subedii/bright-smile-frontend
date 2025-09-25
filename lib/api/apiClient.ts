@@ -11,7 +11,7 @@ class ApiClient {
         this.baseURL = baseURL;
     }
 
-    private async fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    private async fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         const token = await getCookie("token");
 
         const res = await fetch(`${this.baseURL}${endpoint}`, {
@@ -29,48 +29,48 @@ class ApiClient {
             if (res.status === 401) {
                 redirect("/login");
             }
-            throw new Error(errorData.message || "API request failed");
+            return { data: null, error: { status: res.status, message: errorData.message || "API request failed" } };
         }
 
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
-            return res.json() as Promise<T>;
+            return { data: await res.json(), error: undefined };
         }
 
-        return {} as T;
+        return { data: {} as T, error: undefined };
     }
 
-    public async get<T>(endpoint: string): Promise<T> {
+    public async get<T>(endpoint: string): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         return this.fetchApi<T>(endpoint, { method: "GET" });
     }
 
-    public async post<T>(endpoint: string, data: any): Promise<T> {
+    public async post<T>(endpoint: string, data: any): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         return this.fetchApi<T>(endpoint, {
             method: "POST",
             body: JSON.stringify(data),
         });
     }
 
-    public async put<T>(endpoint: string, data: any): Promise<T> {
+    public async put<T>(endpoint: string, data: any): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         return this.fetchApi<T>(endpoint, {
             method: "PUT",
             body: JSON.stringify(data),
         });
     }
 
-    public async patch<T>(endpoint: string, data: any): Promise<T> {
+    public async patch<T>(endpoint: string, data: any): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         return this.fetchApi<T>(endpoint, {
             method: "PATCH",
             body: JSON.stringify(data),
         });
     }
 
-    public async delete<T>(endpoint: string): Promise<T> {
+    public async delete<T>(endpoint: string): Promise<{ data: T | null; error?: { status: number; message: string } }> {
         return this.fetchApi<T>(endpoint, { method: "DELETE" });
     }
 }
 
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/api";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3002";
 
 const apiClient = new ApiClient(API_BASE_URL);
 

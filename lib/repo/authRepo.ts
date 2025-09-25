@@ -13,9 +13,17 @@ interface VerifyOtpData {
 }
 
 export async function register(data: RegisterData): Promise<any> {
-    return apiClient.post("/auth/register", data);
+    const result = await apiClient.post("/auth/register", data);
+    if (result.error) {
+        return { success: false, message: result.error.message };
+    }
+    return result.data;
 }
 
 export async function verifyOtp(data: VerifyOtpData): Promise<any> {
-    return apiClient.post("/auth/verify-otp", data);
+    const result = await apiClient.post("/auth/verify-otp", data);
+    if (result.error) {
+        return { success: false, message: result.error.message };
+    }
+    return result.data;
 }

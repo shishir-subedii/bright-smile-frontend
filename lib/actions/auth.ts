@@ -2,9 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { register, verifyOtp } from "@/lib/repo/authRepo";
-import { setCookie, deleteCookie } from "@/utils/cookieHelper";
+import { setCookie, deleteCookie, getCookie } from "@/utils/cookieHelper";
 
-export async function registerAction(formData: FormData) {
+interface FormState {
+    success: boolean;
+    message?: string;
+}
+
+export async function registerAction(state: FormState, formData: FormData): Promise<FormState> {
     const data = {
         name: formData.get("name") as string,
         email: formData.get("email") as string,
@@ -12,56 +17,42 @@ export async function registerAction(formData: FormData) {
         confirmPassword: formData.get("confirmPassword") as string,
     };
 
-    try {
-        const response = await register(data);
-        if (response.success && response.data?.tempToken) {
-            await setCookie("tempToken", response.data.tempToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                path: "/",
-            });
-            redirect("/verify-otp");
-        } else {
-            throw new Error(response.message || "Registration failed");
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
+    const response = await register(data);
+    if (response.success && response.data?.tempToken) {
+        await setCookie("tempToken", response.data.tempToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+        redirect("/verify-otp");
     }
+    return { success: false, message: response.message || "Registration failed" };
 }
 
-export async function verifyOtpAction(formData: FormData) {
+export async function verifyOtpAction(state: FormState, formData: FormData): Promise<FormState> {
     const otp = formData.get("otp") as string;
     const tempToken = await getCookie("tempToken");
 
     if (!tempToken) {
-        throw new Error("No temporary token found");
+        return { success: false, message: "No temporary token found" };
     }
 
-    try {
-        const response = await verifyOtp({ otp, token: tempToken });
-        if (response.success) {
-            await setCookie("token", response.data.token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                path: "/",
-            });
-            await deleteCookie("tempToken");
-            redirect("/login");
-        } else {
-            throw new Error(response.message || "OTP verification failed");
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
+    const response = await verifyOtp({ otp, token: tempToken });
+    if (response.success && response.data?.token) {
+        await setCookie("token", response.data.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+        await deleteCookie("tempToken");
+        redirect("/login");
     }
+    return { success: false, message: response.message || "OTP verification failed" };
 }
 
 export async function logoutAction() {
     await deleteCookie("token");
     redirect("/");
 }
-
-import { getCookie } from "@/utils/cookieHelper";

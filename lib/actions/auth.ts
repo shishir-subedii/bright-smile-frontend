@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { register, verifyOtp } from "@/lib/repo/authRepo";
+import { register, verifyOtp, login } from "@/lib/repo/authRepo";
 import { setCookie, deleteCookie, getCookie } from "@/utils/cookieHelper";
 
 interface FormState {
@@ -52,7 +52,37 @@ export async function verifyOtpAction(state: FormState, formData: FormData): Pro
     return { success: false, message: response.message || "OTP verification failed" };
 }
 
+export async function loginAction(state: FormState, formData: FormData): Promise<FormState> {
+    const data = {
+        email: formData.get("email") as string,
+        password: formData.get("password") as string,
+    };
+
+    const response = await login(data);
+    console.log('response', response);
+    if (response.success) {
+        await setCookie("token", response.data.accessToken);
+        await setCookie("role", response.data.role, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+        await setCookie("authProvider", response.data.authProvider, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
+        // redirect("/dashboard");
+        return { success: response.success, message: response.message };
+    }
+    return { success: false, message: response.message || "Login failed" };
+}
+
 export async function logoutAction() {
     await deleteCookie("token");
+    await deleteCookie("role");
+    await deleteCookie("authProvider");
     redirect("/");
 }

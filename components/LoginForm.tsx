@@ -5,48 +5,38 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff } from "lucide-react";
-import { registerAction } from "@/lib/actions/auth";
+import { loginAction } from "@/lib/actions/auth";
 import Link from "next/link";
 import GoogleAuthButton from "@/components/common/GoogleAuthButton";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface FormState {
     success: boolean;
     message?: string;
 }
 
-export default function RegisterForm() {
+export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [state, formAction] = useActionState<FormState, FormData>(registerAction, { success: true, message: "" });
+    const [state, formAction] = useActionState<FormState, FormData>(loginAction, { success: true, message: "" });
     const { pending } = useFormStatus();
+    const router = useRouter();
 
     useEffect(() => {
+        console.log('state', state);
         if (state.message && !state.success) {
             toast.error(state.message, { icon: "❌" });
+        }
+        else if(state.message && state.success){
+            toast.success(state.message, { icon: "✅" });
+            router.push("/dashboard");
         }
     }, [state]);
 
     return (
         <form action={formAction} className="space-y-6">
-            <div>
-                <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                </Label>
-                <Input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="John Doe"
-                    className="w-full transition duration-200"
-                    required
-                    disabled={pending}
-                />
-            </div>
-
             <div>
                 <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -63,9 +53,14 @@ export default function RegisterForm() {
             </div>
 
             <div>
-                <Label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                </Label>
+                <div className="flex justify-between items-center mb-1">
+                    <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        Password
+                    </Label>
+                    <Link href="#" className="text-sm text-cyan-600 hover:underline">
+                        Forgot Password?
+                    </Link>
+                </div>
                 <div className="relative">
                     <Input
                         type={showPassword ? "text" : "password"}
@@ -87,44 +82,9 @@ export default function RegisterForm() {
                 </div>
             </div>
 
-            <div>
-                <Label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password
-                </Label>
-                <div className="relative">
-                    <Input
-                        type={showConfirmPassword ? "text" : "password"}
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        placeholder="••••••••"
-                        className="w-full pr-10 transition duration-200"
-                        required
-                        disabled={pending}
-                    />
-                    <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        disabled={pending}
-                    >
-                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex items-start">
-                <Checkbox id="terms" name="terms" required disabled={pending} />
-                <Label htmlFor="terms" className="ml-2 text-sm text-gray-700">
-                    I agree to the{" "}
-                    <Link href="#" className="text-cyan-600 hover:underline">
-                        Bright Smile Terms & Conditions
-                    </Link>
-                </Label>
-            </div>
-
             <Button
                 type="submit"
-                className="w-full bg-green-400 hover:bg-green-500 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-lime-500 hover:bg-lime-600 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={pending}
             >
                 {pending ? (
@@ -136,7 +96,7 @@ export default function RegisterForm() {
                         Loading...
                     </span>
                 ) : (
-                    "Register"
+                    "Login"
                 )}
             </Button>
 
@@ -149,9 +109,9 @@ export default function RegisterForm() {
             <GoogleAuthButton />
 
             <div className="text-center text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-cyan-600 hover:underline font-medium">
-                    Login
+                Don&apos;t have an account?{" "}
+                <Link href="/register" className="text-cyan-600 hover:underline font-medium">
+                    Register
                 </Link>
             </div>
         </form>

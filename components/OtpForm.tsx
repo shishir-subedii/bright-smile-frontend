@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { useActionState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -29,13 +28,12 @@ export default function OtpForm() {
         }
         if (state.message) {
             if (state.success) {
-                toast.success(state.message);
-                router.push("/login");
+                toast.success(state.message, { icon: "✅" });
             } else {
-                toast.error(state.message);
+                toast.error(state.message, { icon: "❌" });
             }
         }
-    }, [state, router]);
+    }, [state]);
 
     return (
         <form action={formAction} className="space-y-6">
@@ -67,8 +65,20 @@ export default function OtpForm() {
                 className="w-full bg-lime-500 hover:bg-lime-600 hover:shadow-lg transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={pending}
             >
-                {pending ? "Loading..." : "Verify Account"}
-                {!pending && <ShieldCheck className="ml-2 w-5 h-5" />}
+                {pending ? (
+                    <span className="flex items-center justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z" />
+                        </svg>
+                        Loading...
+                    </span>
+                ) : (
+                    <>
+                        Verify Account
+                        <ShieldCheck className="ml-2 w-5 h-5" />
+                    </>
+                )}
             </Button>
 
             <div className="text-center">

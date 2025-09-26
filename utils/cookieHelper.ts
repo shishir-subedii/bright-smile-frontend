@@ -10,6 +10,7 @@ interface CookieOptions {
 
 export async function getCookie(name: string): Promise<string | undefined> {
     const cookieStore = await cookies();
+    console.log('cookies', cookieStore);
     return cookieStore.get(name)?.value;
 }
 

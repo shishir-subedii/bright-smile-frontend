@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         // Send TempToken in the request body to backend
         const result = await apiServer.post("/auth/verify-otp", {
             ...body,
-            tempToken, // include the token here
+            token: tempToken, // include the token here
         });
 
         return NextResponse.json(result);

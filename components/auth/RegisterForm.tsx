@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { RegisterFormData } from "@/types";
 import { authRepo } from "@/lib/repos/authRepo";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -154,9 +155,9 @@ export default function RegisterForm() {
 
       <p className="text-center text-sm text-gray-600 mt-6">
         Already have an account?{" "}
-        <a href="#" className="text-cyan-600 font-medium hover:underline">
+        <Link href="/login" className="text-cyan-600 font-medium hover:underline">
           Login
-        </a>
+        </Link>
       </p>
     </form>
   );

@@ -5,3 +5,8 @@ export interface RegisterFormData {
     confirmPassword: string;
     terms: boolean;
 }
+
+export interface LoginFormData {
+    email: string;
+    password: string;
+}

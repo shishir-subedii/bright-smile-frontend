@@ -126,3 +126,10 @@
   right: 12px;
   transform: translateY(-50%);
 }
+/* .content-area {
+  display: none;
+}
+
+.content-area.active {
+  display: block;
+} */

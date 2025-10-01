@@ -10,3 +10,70 @@ export interface LoginFormData {
     email: string;
     password: string;
 }
+
+export enum paymentMethod{
+    CASH = "CASH",
+    STRIPE = "STRIPE",
+    ESEWA = "ESEWA"
+}
+export interface appointmentFormData {
+    date: string;
+    time: string;
+    age: number;
+    pay: string;
+    paymentMethod: paymentMethod;
+    gender: string;
+    phoneNumber: string;
+    doctorId: string;
+}
+
+export interface Doctor {
+    id: number;
+    name: string;
+    specialization: string;
+    maxAppointments: number;
+    idType: string;
+    idNumber: string;
+}
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+}
+
+export interface Appointment {
+    id: number;
+    userId: string;
+    userName: string;
+    doctorId: number;
+    doctorName: string;
+    date: string;
+    time: string;
+    status: 'Pending' | 'Completed' | 'Canceled';
+}
+
+export interface Holiday {
+    id: number;
+    date: string;
+    description: string;
+}
+
+export interface DoctorLeave {
+    id: number;
+    doctorId: number;
+    doctorName: string;
+    date: string;
+    type: 'full' | 'partial';
+    fromTime?: string | null;
+    toTime?: string | null;
+    isGlobal?: boolean;
+}
+
+export interface GlobalLeave {
+    id: number;
+    date: string;
+    fromTime: string | null;
+    toTime: string | null;
+    reason: string;
+}

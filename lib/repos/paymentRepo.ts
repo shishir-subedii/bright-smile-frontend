@@ -1,17 +1,16 @@
-import { appointmentFormData } from "@/types";
 import { apiClient } from "../api/client/apiClient";
 import { handleApiError } from "../utils/errorHandler";
 
 
-class AppointmentRepo {
+class PaymentRepo {
     constructor() { }
-    
-    async bookAppointment({
+
+    async initiateStripePayment({
         data: payload,
         onSuccess,
         onError
     }: {
-        data: appointmentFormData,
+        data: {appointmentId: string},
         onSuccess: (message: unknown) => void;
         onError: (message: string) => void
     }) {
@@ -30,4 +29,4 @@ class AppointmentRepo {
 
     
 }
-export const appointmentRepo = new AppointmentRepo();
+export const paymentRepo = new PaymentRepo();

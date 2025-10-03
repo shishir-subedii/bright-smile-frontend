@@ -1,24 +1,27 @@
-import { appointmentFormData } from "@/types";
+import { appointmentFormData, paymentMethod } from "@/types";
 import { apiClient } from "../api/client/apiClient";
 import { handleApiError } from "../utils/errorHandler";
-
+import { paymentRepo } from "./paymentRepo";
 
 class AppointmentRepo {
     constructor() { }
-    
+    private readonly paymentRepo = paymentRepo;
     async bookAppointment({
-        data: payload,
-        onSuccess,
+        payloadData: payload,
         onError
     }: {
-        data: appointmentFormData,
-        onSuccess: (message: unknown) => void;
+        payloadData: appointmentFormData,
         onError: (message: string) => void
     }) {
         try {
             const { success, data, message } = await apiClient.post('/appointments/book', payload);
             if (success && data) {
-                onSuccess(message);
+                if(payload.paymentMethod === paymentMethod.ESEWA) {
+                    this.paymentRepo.initiateEsewaPayment({
+                        appointmentId: data.id,
+                        onError: (err: string) => onError(err)
+                    });
+                }
             } else {
                 onError(message || "Failed to book appointment");
             }

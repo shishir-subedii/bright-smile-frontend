@@ -33,7 +33,7 @@ class ApiClient {
         return this.fetchApi(endpoint, { method: "GET" });
     }
 
-    public async post(endpoint: string, data: any) {
+    public async post(endpoint: string, data?: any) {
         return this.fetchApi(endpoint, {
             method: "POST",
             body: JSON.stringify(data),

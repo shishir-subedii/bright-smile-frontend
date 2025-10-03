@@ -4,36 +4,37 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Calendar, Search } from "lucide-react";
+import { appointmentRepo } from "@/lib/repos/appointmentRepo";
+import { appointmentFormData, paymentMethod } from "@/types";
+import DoctorSelection from "@/components/appointment/DoctorSelection";
+import AppointmentDetails from "@/components/appointment/AppointmentDetails";
+import PersonalDetails from "@/components/appointment/PersonalDetails";
+import PaymentMethod from "@/components/appointment/PaymentMethod";
 
-interface FormData {
-    doctorId: string;
-    date: string;
-    time: string;
-    age: string;
-    gender: string;
-    countryCode: string;
-    phoneNumber: string;
-    pay: string;
-}
-
-export default function RegisterForm({ children }: { children: React.ReactNode }) {
-    const [formData, setFormData] = useState<FormData>({
+export default function RegisterForm({ children }: { children?: React.ReactNode }) {
+    const [formData, setFormData] = useState<appointmentFormData>({
         doctorId: "",
         date: "",
         time: "",
-        age: "",
+        age: Number(""),
         gender: "",
-        countryCode: "+977",
         phoneNumber: "",
-        pay: "",
+        pay: paymentMethod.CASH,
     });
+
+    const [countryCode, setCountryCode] = useState("+977");
+    const [loading, setLoading] = useState(false); //  loading state
+
+    const updateField = (field: keyof appointmentFormData, value: any) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
 
     const handleCheckSchedule = () => {
         if (!formData.doctorId) {
             toast.error("Please select a doctor first");
             return;
         }
-        toast.info(`Checking schedule for selected doctor (ID: ${formData.doctorId})`);
+        toast.info(`Checking schedule for doctor ID: ${formData.doctorId}`);
     };
 
     const handleFindAvailable = () => {
@@ -44,17 +45,48 @@ export default function RegisterForm({ children }: { children: React.ReactNode }
         toast.info(`Finding doctors available on ${formData.date}`);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         if (!formData.doctorId) {
             toast.error("Please select a doctor");
             return;
         }
-        toast.success("Appointment booked successfully!");
+
+        const payload: appointmentFormData = {
+            ...formData,
+            phoneNumber: `${countryCode}${formData.phoneNumber}`,
+        };
+
+        setLoading(true); //  start loading
+        try {
+            await appointmentRepo.bookAppointment({
+                payloadData: payload,
+                onSuccess: (url) =>
+                    payload.pay === paymentMethod.CASH
+                        ? toast.success(url)
+                        : (window.location.href = url),
+                onError: (msg) =>
+                    toast.error(msg || "Something went wrong booking appointment"),
+            });
+        } catch (err) {
+            toast.error("Something went wrong booking appointment");
+        } finally {
+            setLoading(false); //  stop loading
+        }
     };
 
     return (
         <form id="appointment-form" onSubmit={handleSubmit} className="space-y-12">
+            <DoctorSelection onSelectDoctor={(doctorId: string) => updateField("doctorId", doctorId)} />
+            <AppointmentDetails formData={formData} updateField={updateField} />
+            <PersonalDetails
+                formData={formData}
+                updateField={updateField}
+                countryCode={countryCode}
+                setCountryCode={setCountryCode}
+            />
+            <PaymentMethod formData={formData} updateField={updateField} />
             {children}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
@@ -76,9 +108,11 @@ export default function RegisterForm({ children }: { children: React.ReactNode }
             </div>
             <Button
                 type="submit"
-                className="w-full bg-[#8BC34A] hover:bg-[#7CB342] text-white font-bold py-4 px-6 rounded-lg text-lg transition transform hover:scale-105"
+                disabled={loading} //  disable when loading
+                className={`w-full cursor-pointer bg-[#8BC34A] hover:bg-[#7CB342] text-white font-bold py-4 px-6 rounded-lg text-lg transition transform ${loading ? "opacity-70 cursor-not-allowed hover:scale-100" : "hover:scale-105"
+                    }`}
             >
-                Confirm Appointment
+                {loading ? "Booking..." : "Confirm Appointment"} {/*  dynamic text */}
             </Button>
         </form>
     );

@@ -1,13 +1,7 @@
-"use client";
-
-import { useState } from "react";
-
-export default function PersonalDetails() {
-    const [phoneNumber, setPhoneNumber] = useState("");
-
+export default function PersonalDetails({ formData, updateField, countryCode, setCountryCode }: any) {
     const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/\D/g, "").substring(0, 10);
-        setPhoneNumber(value);
+        updateField("phoneNumber", value);
     };
 
     return (
@@ -22,9 +16,16 @@ export default function PersonalDetails() {
                         type="number"
                         id="age"
                         name="age"
+                        value={formData.age}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            updateField("age", value === "" ? "" : Number(value));
+                        }}
                         min="1"
                         max="120"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-[#00BCD4] focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 
+               focus:outline-none focus:border-[#00BCD4] 
+               focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"
                     />
                 </div>
                 <div>
@@ -35,6 +36,8 @@ export default function PersonalDetails() {
                                 type="radio"
                                 name="gender"
                                 value="MALE"
+                                checked={formData.gender === "MALE"}
+                                onChange={(e) => updateField("gender", e.target.value)}
                                 className="h-4 w-4 text-[#00BCD4] focus:ring-[#00BCD4]"
                             />
                             <span className="ml-2 text-gray-700">Male</span>
@@ -44,6 +47,8 @@ export default function PersonalDetails() {
                                 type="radio"
                                 name="gender"
                                 value="FEMALE"
+                                checked={formData.gender === "FEMALE"}
+                                onChange={(e) => updateField("gender", e.target.value)}
                                 className="h-4 w-4 text-[#00BCD4] focus:ring-[#00BCD4]"
                             />
                             <span className="ml-2 text-gray-700">Female</span>
@@ -57,8 +62,9 @@ export default function PersonalDetails() {
                     <select
                         id="countryCode"
                         name="countryCode"
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
                         className="w-1/4 px-3 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-[#00BCD4] focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"
-                        defaultValue="+977"
                     >
                         <option value="+1">+1 (US)</option>
                         <option value="+44">+44 (UK)</option>
@@ -70,7 +76,7 @@ export default function PersonalDetails() {
                         id="phoneNumber"
                         name="phoneNumber"
                         placeholder="98xxxxxxx"
-                        value={phoneNumber}
+                        value={formData.phoneNumber}
                         onChange={handlePhoneInput}
                         className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-[#00BCD4] focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"
                     />

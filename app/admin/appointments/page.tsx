@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import AppointmentManagement from '@/components/admin/AppointmentManagement';
-import LoadingScreen from '@/components/common/LoadingScreen';
+import LoadingScreen from '@/components/common/loaders/LoadingScreen';
 
 export default function AppointmentsPage() {
     return (

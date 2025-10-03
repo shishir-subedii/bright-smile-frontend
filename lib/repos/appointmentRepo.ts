@@ -8,21 +8,31 @@ class AppointmentRepo {
     private readonly paymentRepo = paymentRepo;
     async bookAppointment({
         payloadData: payload,
+        onSuccess,
         onError
     }: {
         payloadData: appointmentFormData,
+        onSuccess: (url: string) => void;
         onError: (message: string) => void
     }) {
         try {
-            const { success, data, message } = await apiClient.post('/appointments/book', payload);
+            const { success, data, message } = await apiClient.post('/appointments', payload);
+            console.log("API Response:", { success, data, message });
+            if (payload.pay === paymentMethod.CASH) {
+                if (success) {
+                    onSuccess(message || "Appointment booked successfully!");
+                }
+            }
             if (success && data) {
-                if(payload.paymentMethod === paymentMethod.ESEWA) {
+                console.log("Appointment booked:", data);
+                if (payload.pay === paymentMethod.ESEWA) {
                     this.paymentRepo.initiateEsewaPayment({
                         appointmentId: data.id,
-                        onError: (err: string) => onError(err)
+                        onSuccess: (url: string) => onSuccess(url),
+                        onError: (err: string) => onError(err || "Failed to initiate eSewa payment")
                     });
                 }
-            } else {
+            } if (!success) {
                 onError(message || "Failed to book appointment");
             }
         } catch (error: unknown) {
@@ -31,6 +41,6 @@ class AppointmentRepo {
         }
     }
 
-    
+
 }
 export const appointmentRepo = new AppointmentRepo();

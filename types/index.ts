@@ -20,15 +20,14 @@ export interface appointmentFormData {
     date: string;
     time: string;
     age: number;
-    pay: string;
-    paymentMethod: paymentMethod;
+    pay: paymentMethod;
     gender: string;
     phoneNumber: string;
     doctorId: string;
 }
 
 export interface Doctor {
-    id: number;
+    id: string;
     name: string;
     specialization: string;
     maxAppointments: number;

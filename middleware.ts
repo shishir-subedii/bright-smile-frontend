@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getCookie } from './lib/utils/cookieHelper';
 
-export function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value;
-    const role = request.cookies.get('role')?.value;
+export async function middleware(request: NextRequest) {
+    const token = await getCookie('accessToken')
+    const role = await getCookie('role')
     const { pathname } = request.nextUrl;
 
     if (pathname.startsWith('/employer')) {
@@ -18,7 +19,7 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    if (pathname.startsWith('/profile')) {
+    if (pathname.startsWith('/book-appointment')) {
         if (!token) {
             return NextResponse.redirect(new URL('/login', request.url));
         }
@@ -28,5 +29,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/employer/:path*', '/seeker/:path*', '/profile/:path*'],
+    matcher: ['/employer/:path*', '/seeker/:path*', '/book-appointment/:path*'],
 };

@@ -1,8 +1,4 @@
 import RegisterForm from "@/components/appointment/RegisterForm";
-import DoctorSelection from "@/components/appointment/DoctorSelection";
-import AppointmentDetails from "@/components/appointment/AppointmentDetails";
-import PersonalDetails from "@/components/appointment/PersonalDetails";
-import PaymentMethod from "@/components/appointment/PaymentMethod";
 
 export default function RegisterPage() {
     return (
@@ -13,10 +9,6 @@ export default function RegisterPage() {
                     <p className="text-gray-600">Please provide your details and select a preferred doctor.</p>
                 </div>
                 <RegisterForm>
-                    <DoctorSelection />
-                    <AppointmentDetails />
-                    <PersonalDetails />
-                    <PaymentMethod />
                 </RegisterForm>
             </div>
         </main>

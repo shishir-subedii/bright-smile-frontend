@@ -13,7 +13,7 @@ class ApiServer {
 
     private async fetchApi(endpoint: string, options: RequestInit = {}) {
         const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        const token = cookieStore.get("accessToken")?.value;
 
         const incomingHeaders = await headers();
         const clientIp =
@@ -47,7 +47,7 @@ class ApiServer {
         return this.fetchApi(endpoint, { method: "GET" });
     }
 
-    public async post(endpoint: string, data: any) {
+    public async post(endpoint: string, data?: any) {
         return this.fetchApi(endpoint, {
             method: "POST",
             body: JSON.stringify(data),

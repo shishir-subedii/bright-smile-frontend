@@ -1,6 +1,6 @@
 // admin/layout.tsx (server component by default)
 import Sidebar from '@/components/admin/Sidebar';
-import LoadingScreen from '@/components/common/LoadingScreen';
+import LoadingScreen from '@/components/common/loaders/LoadingScreen';
 import { Suspense } from 'react';
 
 export const metadata = {

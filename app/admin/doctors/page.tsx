@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import DoctorManagement from '@/components/admin/DoctorManagement';
-import LoadingScreen from '@/components/common/LoadingScreen';
+import LoadingScreen from '@/components/common/loaders/LoadingScreen';
 
 export default function DoctorsPage() {
     return (

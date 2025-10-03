@@ -1,21 +1,21 @@
+import { Doctor } from "@/types";
 import { apiClient } from "../api/client/apiClient";
 import { handleApiError } from "../utils/errorHandler";
 
-
 class DoctorRepo {
     constructor() { }
-    
+
     async getAllDoctors({
         onSuccess,
         onError
     }: {
-        onSuccess: (message: unknown) => void;
-        onError: (message: string) => void
+        onSuccess: (data: Doctor[]) => void;
+        onError: (message: string) => void;
     }) {
         try {
-            const { success, data, message } = await apiClient.get('/doctors');
+            const { success, data, message } = await apiClient.get("/doctors");
             if (success && data) {
-                onSuccess(data);
+                onSuccess(data as Doctor[]);
             } else {
                 onError(message || "Failed to fetch doctors");
             }
@@ -31,13 +31,13 @@ class DoctorRepo {
         onError
     }: {
         id: string;
-        onSuccess: (message: unknown) => void;
-        onError: (message: string) => void
+        onSuccess: (data: Doctor) => void;
+        onError: (message: string) => void;
     }) {
         try {
             const { success, data, message } = await apiClient.get(`/doctors/${id}`);
             if (success && data) {
-                onSuccess(data);
+                onSuccess(data as Doctor);
             } else {
                 onError(message || "Failed to fetch doctor details");
             }
@@ -45,6 +45,7 @@ class DoctorRepo {
             let errorMsg = handleApiError(error);
             onError(errorMsg);
         }
-    }  
+    }
 }
+
 export const doctorRepo = new DoctorRepo();

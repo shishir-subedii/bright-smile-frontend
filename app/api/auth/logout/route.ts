@@ -3,12 +3,11 @@ import { deleteCookie, getCookie } from "@/lib/utils/cookieHelper";
 import { handleApiError } from "@/lib/utils/errorHandler";
 import { apiServer } from "@/lib/api/server/apiServer";
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const body = await req.json();
 
         // Read TempToken from cookie
-        const tempToken = await getCookie("tempToken");
+        const tempToken = await getCookie("accessToken");
 
         if (!tempToken) {
             return NextResponse.json(
@@ -18,14 +17,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Send TempToken in the request body to backend
-        const result = await apiServer.post("/auth/verify-otp", {
-            ...body,
-            token: tempToken, // include the token here
-        });
-
-        if(result.success){
-            await deleteCookie("accessToken");
-        }
+        const result = await apiServer.get("/auth/logout");
+        await deleteCookie("accessToken");
 
         return NextResponse.json(result);
     } catch (error: unknown) {

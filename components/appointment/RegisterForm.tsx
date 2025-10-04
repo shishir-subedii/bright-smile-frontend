@@ -10,6 +10,7 @@ import DoctorSelection from "@/components/appointment/DoctorSelection";
 import AppointmentDetails from "@/components/appointment/AppointmentDetails";
 import PersonalDetails from "@/components/appointment/PersonalDetails";
 import PaymentMethod from "@/components/appointment/PaymentMethod";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm({ children }: { children?: React.ReactNode }) {
     const [formData, setFormData] = useState<appointmentFormData>({
@@ -45,6 +46,7 @@ export default function RegisterForm({ children }: { children?: React.ReactNode 
         toast.info(`Finding doctors available on ${formData.date}`);
     };
 
+    const router = useRouter();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -64,7 +66,11 @@ export default function RegisterForm({ children }: { children?: React.ReactNode 
                 payloadData: payload,
                 onSuccess: (url) =>
                     payload.pay === paymentMethod.CASH
-                        ? toast.success(url)
+                        ? (
+                            toast.success(url),
+                            router.push("/profile")
+                            
+                    )
                         : (window.location.href = url),
                 onError: (msg) =>
                     toast.error(msg || "Something went wrong booking appointment"),

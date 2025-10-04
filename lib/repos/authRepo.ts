@@ -1,10 +1,8 @@
 import { apiClient } from "../api/client/apiClient";
 import { handleApiError } from "../utils/errorHandler";
 
-
 class AuthRepo {
     constructor() { }
-
 
     async register({
         data: payload,
@@ -70,9 +68,29 @@ class AuthRepo {
         try {
             const { success, data, message } = await apiClient.post('/auth/login', payload);
             if (success && data) {
-                onSuccess(message || 'Login successful');
+                onSuccess(data.authProvider || 'Login successful');
             } else {
                 onError(message || "Failed to fetch user profile");
+            }
+        } catch (error: unknown) {
+            let errorMsg = handleApiError(error);
+            onError(errorMsg);
+        }
+    }
+
+    async logout({
+        onSuccess,
+        onError
+    }: {
+        onSuccess: (message: string) => void;
+        onError: (message: string) => void
+    }) {
+        try {
+            const { success, message } = await apiClient.get('/auth/logout');
+            if (success) {
+                onSuccess(message || 'Logout successful');
+            } else {
+                onError(message || "Failed to logout");
             }
         } catch (error: unknown) {
             let errorMsg = handleApiError(error);

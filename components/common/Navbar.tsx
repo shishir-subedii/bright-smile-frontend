@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Menu, User } from "lucide-react";
+import { useAuthStore } from "@/lib/stores/authStore";
 
-export default function Navbar() {
+export default function ClientNavbar() {
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const links = ['home', 'services', 'why-us', 'testimonials', 'contact', 'doctors'];
+    // Links (remove doctors)
+    const links = ["home", "services", "why-us", "testimonials", "contact"];
 
     const formatHref = (link: string) => {
-        if (link === 'home') return '/';
-        if (link === 'doctors') return '/#doctors';
+        if (link === "home") return "/";
         return `/#${link}`;
     };
 
@@ -35,14 +37,33 @@ export default function Navbar() {
                                 {link.charAt(0).toUpperCase() + link.slice(1)}
                             </Link>
                         ))}
+
+                        {isLoggedIn && (
+                            <Link
+                                href="/book-appointment"
+                                className="text-gray-700 hover:text-cyan-600 transition"
+                            >
+                                Book Appointment
+                            </Link>
+                        )}
                     </nav>
 
-                    <Link
-                        href="/book-appointment"
-                        className="hidden md:block bg-[#8BC34A] hover:bg-[#7CB342] text-white px-6 py-2 rounded-full transition transform hover:scale-105"
-                    >
-                        Book Appointment
-                    </Link>
+                    {/* Right button */}
+                    {isLoggedIn ? (
+                        <Link
+                            href="/profile"
+                            className="hidden md:flex items-center gap-2 bg-[#8BC34A] hover:bg-[#7CB342] text-white px-4 py-2 rounded-full transition"
+                        >
+                            <User className="w-5 h-5" /> View Profile
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/register"
+                            className="hidden md:block bg-[#8BC34A] hover:bg-[#7CB342] text-white px-6 py-2 rounded-full transition"
+                        >
+                            Register Now
+                        </Link>
+                    )}
 
                     {/* Mobile menu toggle */}
                     <Button
@@ -55,7 +76,9 @@ export default function Navbar() {
                 </div>
 
                 {/* Mobile menu */}
-                <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden mt-4 space-y-4`}>
+                <div
+                    className={`${isMobileMenuOpen ? "block" : "hidden"} md:hidden mt-4 space-y-4`}
+                >
                     {links.map((link) => (
                         <Link
                             key={link}
@@ -67,13 +90,21 @@ export default function Navbar() {
                         </Link>
                     ))}
 
-                    <Link
-                        href="/book-appointment"
-                        className="w-full bg-[#8BC34A] hover:bg-[#7CB342] text-white px-6 py-2 rounded-full transition"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                        Book Appointment
-                    </Link>
+                    {isLoggedIn ? (
+                        <Link
+                            href="/book-appointment"
+                            className="w-full flex items-center gap-2 bg-[#8BC34A] hover:bg-[#7CB342] text-white px-4 py-2 rounded-full transition"
+                        >
+                            <User className="w-5 h-5" /> Book Appointment
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/register"
+                            className="w-full bg-[#8BC34A] hover:bg-[#7CB342] text-white px-6 py-2 rounded-full transition"
+                        >
+                            Register Now
+                        </Link>
+                    )}
                 </div>
             </div>
         </header>

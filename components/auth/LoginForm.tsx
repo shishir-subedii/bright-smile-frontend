@@ -11,8 +11,11 @@ import GoogleSignInButton from "./GoogleSignInButton";
 import PasswordInput from "./PasswordInput";
 import { authRepo } from "@/lib/repos/authRepo";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/stores/authStore";
 
 export default function LoginForm() {
+
+    const { addLogin } = useAuthStore();
     const [formData, setFormData] = useState<LoginFormData>({
         email: "",
         password: "",
@@ -35,7 +38,8 @@ export default function LoginForm() {
                 password: formData.password,
             },
             onSuccess: (message) => {
-                toast.success(message as string || "Login successful");
+                toast.success("Login successful");
+                addLogin(message as string)
                 router.push("/");
             },
             onError: (message) => {

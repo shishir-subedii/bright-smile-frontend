@@ -16,6 +16,8 @@ export default function PersonalDetails({ formData, updateField, countryCode, se
                         type="number"
                         id="age"
                         name="age"
+                        required
+                        placeholder="e.g., 30"
                         value={formData.age}
                         onChange={(e) => {
                             const value = e.target.value;
@@ -63,6 +65,7 @@ export default function PersonalDetails({ formData, updateField, countryCode, se
                         id="countryCode"
                         name="countryCode"
                         value={countryCode}
+                        required
                         onChange={(e) => setCountryCode(e.target.value)}
                         className="w-1/4 px-3 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-[#00BCD4] focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"
                     >
@@ -76,6 +79,7 @@ export default function PersonalDetails({ formData, updateField, countryCode, se
                         id="phoneNumber"
                         name="phoneNumber"
                         placeholder="98xxxxxxx"
+                        required
                         value={formData.phoneNumber}
                         onChange={handlePhoneInput}
                         className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-[#00BCD4] focus:shadow-[0_0_0_3px_rgba(0,188,212,0.2)]"

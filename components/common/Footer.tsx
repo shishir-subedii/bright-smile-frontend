@@ -71,7 +71,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="border-t border-gray-700 mt-12 pt-8 text-center">
-                    <p>&copy; 2023 Bright Smile Dental. All rights reserved.</p>
+                    <p>&copy; 2025 Bright Smile Dental. All rights reserved.</p>
                 </div>
             </div>
         </footer>

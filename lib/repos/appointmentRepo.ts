@@ -21,6 +21,7 @@ class AppointmentRepo {
             if (payload.pay === paymentMethod.CASH) {
                 if (success) {
                     onSuccess(message || "Appointment booked successfully!");
+                    return;
                 }
             }
             if (success && data) {
@@ -30,6 +31,13 @@ class AppointmentRepo {
                         appointmentId: data.id,
                         onSuccess: (url: string) => onSuccess(url),
                         onError: (err: string) => onError(err || "Failed to initiate eSewa payment")
+                    });
+                }
+                if (payload.pay === paymentMethod.STRIPE) {
+                    this.paymentRepo.initiateStripePayment({
+                        appointmentId: data.id,
+                        onSuccess: (url: string) => onSuccess(url),
+                        onError: (err: string) => onError(err || "Failed to initiate Stripe payment")
                     });
                 }
             } if (!success) {

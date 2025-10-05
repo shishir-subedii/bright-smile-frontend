@@ -3,29 +3,51 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar, Check, X, CreditCard } from 'lucide-react';
-import { Appointment } from '@/types';
+import { Calendar, Check, X, CreditCard, Download } from 'lucide-react';
 import { toast } from 'sonner';
-
-// interface ProfileContentProps {
-//     appointments: Appointment[];
-// }
+import { paymentRepo } from '@/lib/repos/paymentRepo';
 
 export default function ProfileContent({ appointments }: any) {
-    // Pagination state
     const itemsPerPage = 3;
     const [currentPage, setCurrentPage] = useState(1);
+
     const totalPages = Math.ceil(appointments.length / itemsPerPage);
     const paginatedAppointments = appointments.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    const handlePayNow = (appointmentId: number) => {
-        toast.success(`Processing payment for appointment ${appointmentId}`);
+    const handlePayNow = async (id: string, method: string, status: string) => {
+        if (status !== 'PENDING') {
+            toast.error("Payment is not required for this appointment.");
+            return;
+        }
+        if (method === 'ESEWA') {
+            await paymentRepo.initiateEsewaPayment({
+                appointmentId: id,
+                onSuccess: (paymentUrl: string) => {
+                    window.open(paymentUrl, "_blank");
+                },
+                onError: (errorMsg: any) => {
+                    toast.error(errorMsg);
+                }
+            })
+        }
+        if (method === 'STRIPE') {
+            await paymentRepo.initiateStripePayment({
+                appointmentId: id,
+                onSuccess: (paymentUrl: string) => {
+                    window.open(paymentUrl, "_blank");
+                },
+                onError: (errorMsg: any) => {
+                    toast.error(errorMsg);
+                }
+            })
+        }
     };
 
     const handlePageChange = (page: number) => {
+        if (page < 1 || page > totalPages) return;
         setCurrentPage(page);
     };
 
@@ -35,75 +57,50 @@ export default function ProfileContent({ appointments }: any) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="text-xs font-medium text-gray-500 uppercase">
-                                Doctor
-                            </TableHead>
-                            <TableHead className="text-xs font-medium text-gray-500 uppercase">
-                                Date & Time
-                            </TableHead>
-                            <TableHead className="text-xs font-medium text-gray-500 uppercase">
-                                Status
-                            </TableHead>
-                            <TableHead className="text-xs font-medium text-gray-500 uppercase">
-                                Payment
-                            </TableHead>
-                            <TableHead className="text-xs font-medium text-gray-500 uppercase text-right">
-                                Action
-                            </TableHead>
+                            <TableHead>Doctor</TableHead>
+                            <TableHead>Date & Time</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Payment</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedAppointments.map((appt: any) => (
                             <TableRow key={appt.id}>
-                                <TableCell className="font-medium text-gray-900">
-                                    {appt.doctorName}
-                                </TableCell>
-                                <TableCell className="text-gray-500">
-                                    {appt.date}
-                                    <br />
-                                    {appt.time}
-                                </TableCell>
-                                <TableCell
-                                    className={
-                                        appt.status === 'Completed'
-                                            ? 'text-green-600'
-                                            : appt.status === 'Pending'
-                                                ? 'text-blue-600'
-                                                : 'text-red-600'
-                                    }
-                                >
+                                <TableCell>{appt.doctor?.name}</TableCell>
+                                <TableCell>{appt.date}<br />{appt.time}</TableCell>
+                                <TableCell>
                                     <div className="flex items-center">
-                                        {appt.status === 'Completed' ? (
-                                            <Check className="w-4 h-4 mr-1" />
-                                        ) : appt.status === 'Pending' ? (
-                                            <Calendar className="w-4 h-4 mr-1" />
-                                        ) : (
-                                            <X className="w-4 h-4 mr-1" />
-                                        )}
+                                        {appt.status === 'COMPLETED' && <Check className="w-4 h-4 mr-1 text-green-600" />}
+                                        {appt.status === 'PENDING' && <Calendar className="w-4 h-4 mr-1 text-blue-600" />}
+                                        {appt.status === 'CANCELED' && <X className="w-4 h-4 mr-1 text-red-600" />}
                                         {appt.status}
                                     </div>
                                 </TableCell>
-                                <TableCell
-                                    className={
-                                        appt.paymentStatus === 'Paid'
-                                            ? 'text-green-600'
-                                            : appt.paymentStatus === 'Unpaid'
-                                                ? 'text-yellow-600'
-                                                : 'text-gray-600'
-                                    }
-                                >
+                                <TableCell>
                                     <div className="flex items-center">
                                         <CreditCard className="w-4 h-4 mr-1" />
-                                        {appt.paymentStatus || (appt.status === 'Canceled' ? 'Refunded' : 'Paid')}
+                                        {appt.paymentStatus || (appt.status === 'CANCELED' ? 'Refunded' : 'Paid')}
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-right">
-                                    {appt.paymentStatus === 'Unpaid' && appt.status !== 'Canceled' && (
+                                <TableCell className="text-right flex justify-end gap-2">
+                                    {/* Pay Now Button */}
+                                    {appt.status !== 'BOOKED' && appt.payment?.checkoutUrl && (
                                         <Button
                                             className="bg-[#8BC34A] hover:bg-[#7CB342] text-white text-sm"
-                                            onClick={() => handlePayNow(appt.id)}
+                                            onClick={() => handlePayNow(appt.id, appt.paymentMethod, appt.status)}
                                         >
                                             Pay Now
+                                        </Button>
+                                    )}
+                                    {/* Download Button */}
+                                    {appt.status !== 'PENDING' && appt.fileUrl && (
+                                        <Button
+                                            className="bg-[#00BCD4] hover:bg-[#00acc1] text-white text-sm"
+                                            onClick={() => window.open(appt.fileUrl, "_blank")}
+                                        >
+                                            <Download className="w-4 h-4 mr-1" />
+                                            Download
                                         </Button>
                                     )}
                                 </TableCell>
@@ -117,42 +114,16 @@ export default function ProfileContent({ appointments }: any) {
             <div className="flex items-center justify-between mt-6">
                 <Button
                     variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                 >
                     Previous
                 </Button>
-                <div className="flex space-x-2">
-                    {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => i + 1).map((page) => (
-                        <Button
-                            key={page}
-                            variant="ghost"
-                            className={`px-3 py-1 ${currentPage === page
-                                    ? 'bg-[#00BCD4] text-white'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                                }`}
-                            onClick={() => handlePageChange(page)}
-                        >
-                            {page}
-                        </Button>
-                    ))}
-                    {totalPages > 3 && (
-                        <>
-                            <span className="flex items-center px-2">...</span>
-                            <Button
-                                variant="ghost"
-                                className="px-3 py-1 text-gray-700 hover:bg-gray-100"
-                                onClick={() => handlePageChange(totalPages)}
-                            >
-                                {totalPages}
-                            </Button>
-                        </>
-                    )}
+                <div className="flex items-center space-x-2">
+                    <span>Page {currentPage} of {totalPages}</span>
                 </div>
                 <Button
                     variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                 >

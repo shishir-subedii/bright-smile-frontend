@@ -97,5 +97,48 @@ class AuthRepo {
             onError(errorMsg);
         }
     }
+
+    async getAllUsers({
+        page = 1, limit = 10,
+        onSuccess,
+        onError
+    }: {
+        page?: number;
+        limit?: number;
+        onSuccess: (data: unknown) => void;
+        onError: (message: string) => void
+    }) {
+        try {
+            const { success, data, message } = await apiClient.get(`/user/all?page=${page}&limit=${limit}`);
+            if (success && data) {
+                onSuccess(data);
+            } else {
+                onError(message || "Failed to fetch users");
+            }
+        } catch (error: unknown) {
+            let errorMsg = handleApiError(error);
+            onError(errorMsg);
+        }
+    }
+
+    async getUserProfile({
+        onSuccess,
+        onError 
+    }: {
+        onSuccess: (data: unknown) => void;
+        onError: (message: string) => void
+    }) {
+        try {
+            const { success, data, message } = await apiClient.get(`/user/profile`);
+            if (success && data) {
+                onSuccess(data);
+            } else {
+                onError(message || "Failed to fetch user profile");
+            }
+        } catch (error: unknown) {
+            let errorMsg = handleApiError(error);
+            onError(errorMsg);
+        }
+    }
 }
 export const authRepo = new AuthRepo();

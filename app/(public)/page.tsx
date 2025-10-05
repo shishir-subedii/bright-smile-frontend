@@ -6,6 +6,11 @@ import TestimonialCard from '@/components/common/TestimonialCard';
 import Hero from '@/components/common/Hero';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Bright Smile Dental Clinic',
+  description: 'Your trusted partner for exceptional dental care and a brighter smile.',
+};
+
 export default function Home() {
   const features = [
     { icon: Calendar, title: 'Easy Online Booking', description: 'Schedule appointments anytime, anywhere with our simple online system.' },

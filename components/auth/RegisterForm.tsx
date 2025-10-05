@@ -131,9 +131,9 @@ export default function RegisterForm() {
         />
         <Label htmlFor="terms" className="ml-2 text-sm">
           I agree to the{" "}
-          <a href="#" className="text-cyan-600 hover:underline">
+          <Link href="/terms" className="text-cyan-600 hover:underline">
             Bright Smile Terms & Conditions
-          </a>
+          </Link>
         </Label>
       </div>
 

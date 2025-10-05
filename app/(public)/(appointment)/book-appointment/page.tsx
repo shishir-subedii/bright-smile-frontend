@@ -1,5 +1,10 @@
 import RegisterForm from "@/components/appointment/RegisterForm";
 
+export const metadata = {
+    title: "Book Appointment - Bright Smile Dental Clinic",
+    description: "Schedule your appointment with Bright Smile Dental Clinic. Fill out the form to book your visit.",
+};
+
 export default function RegisterPage() {
     return (
         <main className="flex-grow container mx-auto px-6 py-8 max-w-4xl">

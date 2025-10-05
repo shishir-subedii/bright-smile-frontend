@@ -5,11 +5,13 @@ import Image from "next/image";
 
 export default function GoogleSignInButton() {
     const handleGoogleSignIn = () => {
-        // TODO: Add Google sign-in logic
+        window.open(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/google`, "_blank");
+
     };
 
     return (
         <Button
+        type="button"
             variant="outline"
             className="w-full flex items-center justify-center gap-2 cursor-pointer"
             onClick={handleGoogleSignIn}

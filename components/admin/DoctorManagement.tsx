@@ -158,7 +158,7 @@ const DoctorManagement = () => {
                                 </label>
                                 <Input
                                     type="number"
-                                    value={formData.maxAppointmentsPerDay || ''}
+                                    value={formData.maxAppointmentsPerDay || 30}
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,

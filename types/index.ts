@@ -66,13 +66,14 @@ export interface Holiday {
 
 export interface DoctorLeave {
     id: number;
-    doctorId: number;
+    doctorId: string;
     doctorName: string;
     date: string;
     type: 'full' | 'partial';
     fromTime?: string | null;
     toTime?: string | null;
     isGlobal?: boolean;
+    reason?: string;
 }
 
 export interface GlobalLeave {

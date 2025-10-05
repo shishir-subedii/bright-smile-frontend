@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,41 +8,118 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { doctors, holidays } from '@/lib/data';
+import { availabilityRepo } from '@/lib/repos/availabilityRepo';
+import { apiClient } from '@/lib/api/client/apiClient';
 import { DoctorLeave } from '@/types';
 
 const ScheduleManagement = () => {
     const [leaveData, setLeaveData] = useState<Partial<DoctorLeave>>({ type: 'full' });
     const [holidayDate, setHolidayDate] = useState('');
+    const [holidays, setHolidays] = useState<any[]>([]);
+    const [doctors, setDoctors] = useState<any[]>([]);
 
-    const handleAddHoliday = () => {
-        if (holidayDate) {
-            toast.success('Holiday added successfully');
-            setHolidayDate('');
+    const [loadingAddHoliday, setLoadingAddHoliday] = useState(false);
+    const [loadingRemoveHolidayIds, setLoadingRemoveHolidayIds] = useState<string[]>([]);
+    const [loadingSubmitLeave, setLoadingSubmitLeave] = useState(false);
+    const [loadingGlobalLeave, setLoadingGlobalLeave] = useState(false);
+
+    useEffect(() => {
+        fetchDoctors();
+        fetchHolidays();
+    }, []);
+
+    const fetchDoctors = async () => {
+        try {
+            const { success, data } = await apiClient.get('/doctors');
+            if (success && data) {
+                setDoctors(data);
+            } else {
+                toast.error('Failed to load doctors');
+            }
+        } catch {
+            toast.error('Error fetching doctors');
         }
     };
 
-    const handleRemoveHoliday = (id: number) => {
-        toast.success('Holiday removed successfully');
+    const fetchHolidays = () => {
+        availabilityRepo.getHolidays({
+            onSuccess: (data) => setHolidays(data),
+            onError: (message) => toast.error(message),
+        });
     };
 
-    const handleSubmitLeave = (e: React.FormEvent) => {
+    const handleAddHoliday = async () => {
+        if (!holidayDate) return;
+        setLoadingAddHoliday(true);
+        await availabilityRepo.addHoliday({
+            payloadData: { date: holidayDate, reason: 'Clinic holiday' },
+            onSuccess: (message) => {
+                toast.success(message);
+                setHolidayDate('');
+                fetchHolidays();
+            },
+            onError: (message) => toast.error(message),
+        });
+        setLoadingAddHoliday(false);
+    };
+
+    const handleRemoveHoliday = async (id: string) => {
+        setLoadingRemoveHolidayIds((prev) => [...prev, id]);
+        await availabilityRepo.removeHoliday({
+            id,
+            onSuccess: (message) => {
+                toast.success(message);
+                fetchHolidays();
+            },
+            onError: (message) => toast.error(message),
+        });
+        setLoadingRemoveHolidayIds((prev) => prev.filter((hid) => hid !== id));
+    };
+
+    const handleSubmitLeave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (leaveData.doctorName && leaveData.date) {
-            toast.success(`Leave added for ${leaveData.doctorName}`);
-            setLeaveData({ type: 'full' });
+        if (!leaveData.doctorId || !leaveData.date) {
+            toast.error('Please select doctor and date');
+            return;
         }
+
+        setLoadingSubmitLeave(true);
+        await availabilityRepo.addDoctorAbsence({
+            payloadData: {
+                doctorId: leaveData.doctorId,
+                date: leaveData.date,
+                fromTime: leaveData.fromTime || '00:00',
+                toTime: leaveData.toTime || '23:59',
+                reason: leaveData.reason || 'Leave',
+            },
+            onSuccess: (message) => {
+                toast.success(message);
+                setLeaveData({ type: 'full' });
+            },
+            onError: (message) => toast.error(message),
+        });
+        setLoadingSubmitLeave(false);
     };
 
-    const handleSubmitGlobalLeave = (e: React.FormEvent) => {
+    const handleSubmitGlobalLeave = async (e: React.FormEvent) => {
         e.preventDefault();
-        toast.success('Leave applied to all doctors');
+        setLoadingGlobalLeave(true);
+        try {
+            await apiClient.post('/availability/global-leave', {
+                // backend fields
+            });
+            toast.success('Leave applied to all doctors');
+        } catch {
+            toast.error('Failed to apply global leave');
+        }
+        setLoadingGlobalLeave(false);
     };
 
     return (
         <div className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">Schedule & Leave Management</h2>
 
+            {/* Clinic Holidays */}
             <Card>
                 <CardHeader>
                     <CardTitle className="text-lg font-semibold text-gray-700">Clinic Holidays</CardTitle>
@@ -54,21 +131,36 @@ const ScheduleManagement = () => {
                             value={holidayDate}
                             onChange={(e) => setHolidayDate(e.target.value)}
                         />
-                        <Button onClick={handleAddHoliday}>Add Holiday</Button>
+                        <Button onClick={handleAddHoliday} disabled={loadingAddHoliday}>
+                            {loadingAddHoliday ? 'Saving...' : 'Add Holiday'}
+                        </Button>
                     </div>
                     <div className="mt-4 space-y-2">
-                        {holidays.map((holiday) => (
-                            <div key={holiday.id} className="flex justify-between items-center bg-gray-50 px-4 py-2 rounded">
-                                <span>{holiday.date} - {holiday.description}</span>
-                                <Button variant="ghost" className="text-red-400" onClick={() => handleRemoveHoliday(holiday.id)}>
-                                    Remove
-                                </Button>
-                            </div>
-                        ))}
+                        {holidays.length > 0 ? (
+                            holidays.map((holiday) => (
+                                <div
+                                    key={holiday.id}
+                                    className="flex justify-between items-center bg-gray-50 px-4 py-2 rounded"
+                                >
+                                    <span>{holiday.date} - {holiday.reason}</span>
+                                    <Button
+                                        variant="ghost"
+                                        className="text-red-400"
+                                        onClick={() => handleRemoveHoliday(holiday.id)}
+                                        disabled={loadingRemoveHolidayIds.includes(holiday.id)}
+                                    >
+                                        {loadingRemoveHolidayIds.includes(holiday.id) ? 'Removing...' : 'Remove'}
+                                    </Button>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-sm">No holidays found.</p>
+                        )}
                     </div>
                 </CardContent>
             </Card>
 
+            {/* Doctor Leave */}
             <Card>
                 <CardHeader>
                     <CardTitle className="text-lg font-semibold text-gray-700">Doctor Leave Management</CardTitle>
@@ -79,15 +171,15 @@ const ScheduleManagement = () => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
                                 <Select
-                                    value={leaveData.doctorName || ''}
-                                    onValueChange={(value) => setLeaveData({ ...leaveData, doctorName: value })}
+                                    value={leaveData.doctorId || ''}
+                                    onValueChange={(value) => setLeaveData({ ...leaveData, doctorId: value })}
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Doctor" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {doctors.map((doctor) => (
-                                            <SelectItem key={doctor.id} value={doctor.name}>
+                                            <SelectItem key={doctor.id} value={doctor.id}>
                                                 {doctor.name}
                                             </SelectItem>
                                         ))}
@@ -141,16 +233,19 @@ const ScheduleManagement = () => {
                             )}
                         </div>
                         <div className="flex justify-end space-x-3">
-                            <Button variant="outline" onClick={() => setLeaveData({ type: 'full' })}>
+                            <Button variant="outline" type="button" onClick={() => setLeaveData({ type: 'full' })}>
                                 Cancel
                             </Button>
-                            <Button type="submit">Save Leave</Button>
+                            <Button type="submit" disabled={loadingSubmitLeave}>
+                                {loadingSubmitLeave ? 'Saving...' : 'Save Leave'}
+                            </Button>
                         </div>
                     </form>
                 </CardContent>
             </Card>
 
-            <Card>
+            {/* Global Leave */}
+            {/* <Card>
                 <CardHeader>
                     <CardTitle className="text-lg font-semibold text-gray-700">Global Leave (All Doctors)</CardTitle>
                 </CardHeader>
@@ -175,12 +270,14 @@ const ScheduleManagement = () => {
                             </div>
                         </div>
                         <div className="flex justify-end space-x-3">
-                            <Button variant="outline">Cancel</Button>
-                            <Button type="submit">Apply to All</Button>
+                            <Button variant="outline" type="button">Cancel</Button>
+                            <Button type="submit" disabled={loadingGlobalLeave}>
+                                {loadingGlobalLeave ? 'Applying...' : 'Apply to All'}
+                            </Button>
                         </div>
                     </form>
                 </CardContent>
-            </Card>
+            </Card> */}
         </div>
     );
 };

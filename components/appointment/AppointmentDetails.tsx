@@ -1,7 +1,8 @@
 "use client";
 
+import { availabilityRepo } from "@/lib/repos/availabilityRepo";
 import { appointmentFormData } from "@/types";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 // Function to generate time slots
@@ -22,15 +23,17 @@ function generateTimeSlots(start = "10:00", end = "18:00", interval = 15) {
     return slots;
 }
 
-// Static holidays and lunch breaks
-const holidays = [
-    {
-        id: "3eee0160-a15e-4626-8363-51f4317a624e",
-        date: "2025-10-20",
-        reason: "Dashain Festival",
-    },
-];
+interface Holiday {
+    id: string;
+    date: string; // YYYY-MM-DD
+    reason: string;
+    isRecurring: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
 
+
+// Static holidays and lunch breaks
 const lunchBreakStart = "14:00"; // 2:00 PM
 const lunchBreakEnd = "14:30"; // 2:30 PM
 
@@ -39,10 +42,31 @@ interface AppointmentDetailsProps {
     updateField: (field: keyof appointmentFormData, value: any) => void;
 }
 
+
 export default function AppointmentDetails({
     formData,
     updateField,
 }: AppointmentDetailsProps) {
+
+    const [holidays, setHolidays] = useState<Holiday[]>([]);
+    const fetchHolidays = async () => {
+        try {
+            await availabilityRepo.getHolidays(
+                {
+                    onSuccess: (data) => setHolidays(data),
+                    onError: (message) => toast.error(message),
+                }
+            );
+        } catch (error) {
+            console.error("Error fetching holidays:", error);
+            toast.error("Failed to load holidays. Please try again later.");
+        }
+    };
+
+    useEffect(()=>{
+        fetchHolidays();
+    }, [])
+
     const slots = useMemo(() => generateTimeSlots("10:00", "18:00", 15), []);
 
     // Disable past dates, Saturdays, and holidays

@@ -1,3 +1,4 @@
+import { getCookie } from "@/lib/utils/cookieHelper";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,14 +13,15 @@ class ApiServer {
     }
 
     private async fetchApi(endpoint: string, options: RequestInit = {}) {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("accessToken")?.value;
+        const token = await getCookie("accessToken");
+        console.log("Access Token:", token);
 
         const incomingHeaders = await headers();
         const clientIp =
             incomingHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
             incomingHeaders.get("x-real-ip") ||
             "unknown";
+
 
         const res = await fetch(`${this.baseURL}${endpoint}`, {
             ...options,
@@ -37,7 +39,7 @@ class ApiServer {
 
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
-            return res.json(); // 🔹 return raw backend JSON
+            return res.json(); // return raw backend JSON
         }
 
         return res; // fallback (could be HTML, plain text, etc.)
@@ -61,7 +63,7 @@ class ApiServer {
         });
     }
 
-    public async patch(endpoint: string, data: any) {
+    public async patch(endpoint: string, data?: any) {
         return this.fetchApi(endpoint, {
             method: "PATCH",
             body: JSON.stringify(data),

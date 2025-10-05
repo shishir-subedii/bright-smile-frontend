@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
         // Send TempToken in the request body to backend
         const result = await apiServer.get("/auth/logout");
         await deleteCookie("accessToken");
+        await deleteCookie("role");
+        await deleteCookie("authProvider");
 
         return NextResponse.json(result);
     } catch (error: unknown) {

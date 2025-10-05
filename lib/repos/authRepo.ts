@@ -68,7 +68,7 @@ class AuthRepo {
         try {
             const { success, data, message } = await apiClient.post('/auth/login', payload);
             if (success && data) {
-                onSuccess(data.authProvider || 'Login successful');
+                onSuccess(data || 'Login successful');
             } else {
                 onError(message || "Failed to fetch user profile");
             }

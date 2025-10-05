@@ -26,12 +26,18 @@ export interface appointmentFormData {
     doctorId: string;
 }
 
+export enum DoctorIDType {
+    LICENSE = "LICENSE",
+    PASSPORT = "PASSPORT",
+    CITIZENSHIP = "CITIZENSHIP",
+}
+
 export interface Doctor {
     id: string;
     name: string;
     specialization: string;
-    maxAppointments: number;
-    idType: string;
+    maxAppointmentsPerDay: number;
+    idType: DoctorIDType;
     idNumber: string;
 }
 

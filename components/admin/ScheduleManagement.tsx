@@ -21,7 +21,12 @@ const ScheduleManagement = () => {
     const [loadingAddHoliday, setLoadingAddHoliday] = useState(false);
     const [loadingRemoveHolidayIds, setLoadingRemoveHolidayIds] = useState<string[]>([]);
     const [loadingSubmitLeave, setLoadingSubmitLeave] = useState(false);
-    const [loadingGlobalLeave, setLoadingGlobalLeave] = useState(false);
+
+    // For doctor absences
+    const [selectedDoctorId, setSelectedDoctorId] = useState('');
+    const [absenceDate, setAbsenceDate] = useState('');
+    const [doctorAbsences, setDoctorAbsences] = useState<any[]>([]);
+    const [loadingDoctorAbsences, setLoadingDoctorAbsences] = useState(false);
 
     useEffect(() => {
         fetchDoctors();
@@ -101,18 +106,19 @@ const ScheduleManagement = () => {
         setLoadingSubmitLeave(false);
     };
 
-    const handleSubmitGlobalLeave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoadingGlobalLeave(true);
-        try {
-            await apiClient.post('/availability/global-leave', {
-                // backend fields
-            });
-            toast.success('Leave applied to all doctors');
-        } catch {
-            toast.error('Failed to apply global leave');
+    const handleFetchDoctorAbsences = async () => {
+        if (!selectedDoctorId || !absenceDate) {
+            toast.error('Select doctor and date');
+            return;
         }
-        setLoadingGlobalLeave(false);
+        setLoadingDoctorAbsences(true);
+        availabilityRepo.getDoctorAbsences({
+            id: selectedDoctorId,
+            date: absenceDate,
+            onSuccess: (data) => setDoctorAbsences(data),
+            onError: (message) => toast.error(message),
+        });
+        setLoadingDoctorAbsences(false);
     };
 
     return (
@@ -244,40 +250,66 @@ const ScheduleManagement = () => {
                 </CardContent>
             </Card>
 
-            {/* Global Leave */}
-            {/* <Card>
+            {/* Doctor Absences */}
+            <Card>
                 <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-gray-700">Global Leave (All Doctors)</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-gray-700">View Doctor Absences</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmitGlobalLeave} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Leave Date</label>
-                                <Input type="date" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                                <Input type="text" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">From Time</label>
-                                <Input type="time" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">To Time</label>
-                                <Input type="time" />
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+                            <Select
+                                value={selectedDoctorId}
+                                onValueChange={(value) => setSelectedDoctorId(value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Doctor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {doctors.map((doctor) => (
+                                        <SelectItem key={doctor.id} value={doctor.id}>
+                                            {doctor.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="flex justify-end space-x-3">
-                            <Button variant="outline" type="button">Cancel</Button>
-                            <Button type="submit" disabled={loadingGlobalLeave}>
-                                {loadingGlobalLeave ? 'Applying...' : 'Apply to All'}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <Input
+                                type="date"
+                                value={absenceDate}
+                                onChange={(e) => setAbsenceDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-end">
+                            <Button
+                                onClick={handleFetchDoctorAbsences}
+                                disabled={loadingDoctorAbsences}
+                            >
+                                {loadingDoctorAbsences ? 'Fetching...' : 'Fetch Absences'}
                             </Button>
                         </div>
-                    </form>
+                    </div>
+                    <div className="space-y-2">
+                        {doctorAbsences.length > 0 ? (
+                            doctorAbsences.map((absence) => (
+                                <div
+                                    key={absence.id}
+                                    className="bg-gray-50 px-4 py-2 rounded"
+                                >
+                                    <span>
+                                        {absence.date} - {absence.fromTime} to {absence.toTime} ({absence.reason || 'Leave'})
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-sm">No absences found.</p>
+                        )}
+                    </div>
                 </CardContent>
-            </Card> */}
+            </Card>
         </div>
     );
 };

@@ -115,6 +115,30 @@ class AvailabilityRepo {
             onError(errorMsg);
         }
     }
+
+    async getDoctorAbsences({
+        id,
+        date,
+        onSuccess,
+        onError,
+    }: {
+        id: string;
+        date: string;
+        onSuccess: (data: any) => void;
+        onError: (message: string) => void;
+    }) {
+        try {
+            const { success, data, message } = await apiClient.get(`/availability/doctor-absences/${id}/${date}`);
+            if (success && data) {
+                onSuccess(data);
+            } else {
+                onError(message || "Failed to fetch doctor absences");
+            }
+        } catch (error: unknown) {
+            let errorMsg = handleApiError(error);
+            onError(errorMsg);
+        }
+    }
 }
 
 export const availabilityRepo = new AvailabilityRepo();

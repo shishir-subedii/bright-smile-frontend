@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiServer } from "@/lib/api/server/apiServer";
 import { handleApiError } from "@/lib/utils/errorHandler";
 
-// Add Doctor Absence
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const body = await req.json();
-        const result = await apiServer.post("/availability/doctor-absences", body); // Call backend
+        const url = req.nextUrl;
+        const page = url.searchParams.get("page") || "1";
+        const limit = url.searchParams.get("limit") || "10";
+
+        const result = await apiServer.get(`/user/all?page=${page}&limit=${limit}`);
         return NextResponse.json(result);
     } catch (error: unknown) {
         return NextResponse.json(
@@ -15,4 +17,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-

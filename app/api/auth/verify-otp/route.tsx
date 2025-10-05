@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         });
 
         if(result.success){
-            await deleteCookie("accessToken");
+            await deleteCookie("tempToken");
         }
 
         return NextResponse.json(result);

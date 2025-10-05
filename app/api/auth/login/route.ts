@@ -25,16 +25,24 @@ export async function POST(req: NextRequest) {
             });
             await setCookie("authProvider", result.data.authProvider, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
                 sameSite: "lax",
                 path: "/",
                 maxAge: 60 * 60 * 24 * 7, // 7 days
             });
         }
-            return NextResponse.json(result);
-        } catch (error: unknown) {
-            return NextResponse.json(
-                { success: false, message: handleApiError(error) }
-            );
+        //hide token in response
+        const res = {
+            success: result.success,
+            message: result.message,
+            data: {
+                authProvider: result.data.authProvider,
+                isAdmin: result.data.role === "ADMIN",
+            }
         }
+        return NextResponse.json(res);
+    } catch (error: unknown) {
+        return NextResponse.json(
+            { success: false, message: handleApiError(error) }
+        );
     }
+}

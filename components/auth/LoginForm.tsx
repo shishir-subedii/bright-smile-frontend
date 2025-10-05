@@ -37,10 +37,15 @@ export default function LoginForm() {
                 email: formData.email,
                 password: formData.password,
             },
-            onSuccess: (message) => {
+            onSuccess: (message: any) => {
                 toast.success("Login successful");
-                addLogin(message as string)
+                addLogin(message.authProvider as string)
+                if(message.isAdmin){
+                    router.push("/admin");
+                }
+                else {
                 router.push("/");
+                }
             },
             onError: (message) => {
                 toast.error(message);

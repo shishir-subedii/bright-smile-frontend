@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { Menu, X, LayoutDashboard, Stethoscope, Calendar, Clock, Users, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { authRepo } from '@/lib/repos/authRepo';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
     const pathname = usePathname() || '/admin'; // fallback
+    const { clearLogin } = useAuthStore();
 
     const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -20,9 +23,17 @@ const Sidebar = () => {
         { href: '/admin/users', label: 'User Management', icon: Users },
     ];
 
-    const handleNavClick = (href: string) => {
+    const handleNavClick = async (href: string) => {
         router.push(href);
-        if (window.innerWidth < 768) setIsOpen(false);
+        setIsOpen(false); // Close sidebar on mobile after navigation
+    };
+
+    const handleLogout = async () => {
+        await authRepo.logout({
+            onSuccess: (message) => router.push('/'),
+            onError: (message) => router.push('/'),
+        });
+        clearLogin();
     };
 
     return (
@@ -72,7 +83,7 @@ const Sidebar = () => {
                         <Button
                             variant="ghost"
                             className="w-full flex items-center p-3 cursor-pointer mb-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white"
-                            onClick={() => handleNavClick('/')}
+                            onClick={() => handleLogout()}
                         >
                             <LogOut className="h-5 w-5 mr-3" />
                             Logout

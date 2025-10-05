@@ -47,7 +47,7 @@ class ApiClient {
         });
     }
 
-    public async patch(endpoint: string, data: any) {
+    public async patch(endpoint: string, data?: any) {
         return this.fetchApi(endpoint, {
             method: "PATCH",
             body: JSON.stringify(data),

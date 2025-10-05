@@ -23,3 +23,19 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+export async function GET(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const limit = searchParams.get("limit") || "10";
+        const page = searchParams.get("page") || "1";
+
+        const result = await apiServer.get(`/appointments?limit=${limit}&page=${page}`);
+        return NextResponse.json(result);
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, message: handleApiError(error) },
+            { status: 500 }
+        );
+    }
+}

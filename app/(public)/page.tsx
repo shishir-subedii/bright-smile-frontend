@@ -6,9 +6,13 @@ import TestimonialCard from '@/components/common/TestimonialCard';
 import Hero from '@/components/common/Hero';
 import Link from 'next/link';
 
+//seo friendly metadata
 export const metadata = {
   title: 'Bright Smile Dental Clinic',
   description: 'Your trusted partner for exceptional dental care and a brighter smile.',
+  keywords: 'Dental Clinic, Dentistry, Oral Health, Teeth Cleaning, Cosmetic Dentistry, Family Dentist, Emergency Dental Care',
+  authors: [{ name: 'Bright Smile Dental Clinic', url: 'https://brightsmile-frontend.vercel.app' }],
+  creator: 'Shishir Subedi',
 };
 
 export default function Home() {

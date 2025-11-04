@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
 import { getCookie } from '@/lib/utils/cookieHelper';
 import { redirect } from 'next/navigation';
-import RedirectHandler from '@/components/profile/RedirectHandler';
+import CountdownRedirect from '@/components/profile/CountdownRedirect';
 
 export default async function PaymentSuccessPage() {
     const token = await getCookie('accessToken');
@@ -10,6 +10,7 @@ export default async function PaymentSuccessPage() {
     if (!token) {
         redirect('/login');
     }
+
     return (
         <div className="bg-[#F9FAFB] min-h-screen flex flex-col">
             <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center">
@@ -22,9 +23,9 @@ export default async function PaymentSuccessPage() {
                     <CardContent className="text-center">
                         <CheckCircle className="w-16 h-16 text-[#00BCD4] mx-auto mb-4" />
                         <p className="text-gray-600 mb-4">
-                            Your payment has been processed successfully. You will be redirected to your profile in 4 seconds.
+                            Your payment has been processed successfully. You will be redirected to your profile in{' '}
+                            <CountdownRedirect seconds={4} redirectTo="/profile" /> seconds.
                         </p>
-                        <RedirectHandler />
                     </CardContent>
                 </Card>
             </main>

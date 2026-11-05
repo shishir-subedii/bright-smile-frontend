@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "allowScripts": {
+    "@tailwindcss/oxide": true,
+    "sharp": true,
+    "unrs-resolver": true
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-checkbox": "^1.3.3",

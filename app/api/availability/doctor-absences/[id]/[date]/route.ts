@@ -7,8 +7,8 @@ interface Params {
     date: string;
 }
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
-    const { id, date } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<Params> }) {
+    const { id, date } = await params;
 
     if (!id || !date) {
         return NextResponse.json(

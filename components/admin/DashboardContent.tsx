@@ -120,11 +120,11 @@ const DashboardContent = () => {
                             {doctors.map((doctor) => (
                                 <div key={doctor.id} className="flex items-center">
                                     <div
-                                        className={`h-3 w-3 rounded-full mr-3 ${doctor.id === 2 ? 'bg-red-400' : 'bg-green-500'
+                                        className={`h-3 w-3 rounded-full mr-3 ${doctor.id === '2' ? 'bg-red-400' : 'bg-green-500'
                                             }`}
                                     ></div>
                                     <span className="text-sm font-medium">
-                                        {doctor.name}: {doctor.id === 2 ? 'On Leave' : 'Available'}
+                                        {doctor.name}: {doctor.id === '2' ? 'On Leave' : 'Available'}
                                     </span>
                                 </div>
                             ))}

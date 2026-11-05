@@ -7,9 +7,9 @@ export interface idParams {
     id: string;
 }
 
-export const GET = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: idParams }) => {
+export const GET = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: Promise<idParams> }) => {
     try {
-        const { id } = params;
+        const { id } = await params;
         const result = await apiServer.get(`/appointments/admin/${id}`);
         return NextResponse.json(result);
     } catch (error) {

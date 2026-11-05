@@ -1,9 +1,9 @@
-import { Doctor, User, Appointment, Holiday, DoctorLeave, GlobalLeave } from '@/types';
+import { Doctor, User, Appointment, Holiday, DoctorLeave, GlobalLeave, DoctorIDType } from '@/types';
 
 export const doctors: Doctor[] = [
-    { id: 1, name: 'Dr. Sarah Johnson', specialization: 'Orthodontics', maxAppointments: 15, idType: 'Medical License', idNumber: 'MD12345' },
-    { id: 2, name: 'Dr. Michael Chen', specialization: 'Periodontics', maxAppointments: 12, idType: 'Medical License', idNumber: 'MD67890' },
-    { id: 3, name: 'Dr. Emma Wilson', specialization: 'Pedodontics', maxAppointments: 10, idType: 'Medical License', idNumber: 'MD54321' },
+    { id: '1', name: 'Dr. Sarah Johnson', specialization: 'Orthodontics', maxAppointmentsPerDay: 15, idType: DoctorIDType.LICENSE, idNumber: 'MD12345' },
+    { id: '2', name: 'Dr. Michael Chen', specialization: 'Periodontics', maxAppointmentsPerDay: 12, idType: DoctorIDType.LICENSE, idNumber: 'MD67890' },
+    { id: '3', name: 'Dr. Emma Wilson', specialization: 'Pedodontics', maxAppointmentsPerDay: 10, idType: DoctorIDType.LICENSE, idNumber: 'MD54321' },
 ];
 
 export const users: User[] = [

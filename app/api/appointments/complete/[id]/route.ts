@@ -7,9 +7,9 @@ export interface idParams {
     id: string;
 }
 
-export const PATCH = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: idParams }) => {
+export const PATCH = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: Promise<idParams> }) => {
     try {
-        const { id } = params;
+        const { id } = await params;
         const result = await apiServer.patch(`/appointments/complete/${id}`);
         return NextResponse.json(result);
     } catch (error) {

@@ -6,9 +6,9 @@ export interface statusParams {
     status: string;
 }
 
-export async function GET(req: NextRequest, { params }: { params: statusParams }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<statusParams> }) {
     try {
-        const { status } = params;
+        const { status } = await params;
         const { searchParams } = new URL(req.url);
         const limit = searchParams.get("limit") || "10";
         const page = searchParams.get("page") || "1";

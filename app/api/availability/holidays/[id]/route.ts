@@ -7,9 +7,9 @@ interface Params {
 }
 
 // Remove Holiday
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<Params> }) {
     try {
-        const { id } = params;
+        const { id } = await params;
         if (!id) {
             return NextResponse.json(
                 { success: false, message: "Holiday ID is required" },

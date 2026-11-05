@@ -6,9 +6,9 @@ export interface doctorParams {
     doctorId: string;
 }
 
-export async function GET(req: NextRequest, { params }: { params: doctorParams }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<doctorParams> }) {
     try {
-        const { doctorId } = params;
+        const { doctorId } = await params;
         const { searchParams } = new URL(req.url);
         const date = searchParams.get("date") || "";
         const limit = searchParams.get("limit") || "10";

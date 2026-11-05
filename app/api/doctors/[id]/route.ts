@@ -7,9 +7,9 @@ export interface idParams {
     id: string;
 }
 
-export async function GET(req: NextRequest, { params }: { params: idParams }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<idParams> }) {
     try {
-        const { id } = params;
+        const { id } = await params;
         if (!id) {
             return NextResponse.json(
                 { success: false, message: "Doctor ID is required" },
@@ -27,9 +27,9 @@ export async function GET(req: NextRequest, { params }: { params: idParams }) {
     }
 }
 
-export const PATCH = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: idParams }) => {
+export const PATCH = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: Promise<idParams> }) => {
     try {
-        const { id } = await Promise.resolve(params);
+        const { id } = await params;
         if (!id) {
             return NextResponse.json(
                 { success: false, message: "Doctor ID is required" },
@@ -49,9 +49,9 @@ export const PATCH = withRole(['ADMIN'], async (req: NextRequest, { params }: { 
     }
 });
 
-export const DELETE = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: idParams }) => {
+export const DELETE = withRole(['ADMIN'], async (req: NextRequest, { params }: { params: Promise<idParams> }) => {
     try {
-        const { id } = params;
+        const { id } = await params;
         if (!id) {
             return NextResponse.json(
                 { success: false, message: "Doctor ID is required" },
@@ -67,4 +67,3 @@ export const DELETE = withRole(['ADMIN'], async (req: NextRequest, { params }: {
         );
     }   
 });
-
